@@ -1,1 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IPL 2027 Mega Auction — Pro Simulator</title>
+<style>
+:root{--bg:#07101d;--panel:#101d30;--panel2:#172943;--line:#2a4260;--gold:#ffd166;--muted:#9eb1c9;--text:#f5f7fb;--green:#43d9a2;--red:#ff7373}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -10%,#25466c,#08111f 54%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{text-align:center;padding:25px 14px 15px}h1{font-size:clamp(26px,5vw,42px);margin:0}header p{color:var(--muted);margin:7px 0}
+.wrap{max-width:1280px;margin:auto;padding:12px 16px 40px}.toolbar,.panel,.team,.player,.stat{background:linear-gradient(145deg,var(--panel),#0d1929);border:1px solid var(--line);border-radius:16px}
+.toolbar{display:flex;align-items:end;gap:11px;flex-wrap:wrap;padding:14px;margin-bottom:14px}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}select,button{font:inherit;border-radius:10px;border:1px solid var(--line);padding:10px 12px;background:#0a1728;color:var(--text)}button{cursor:pointer;background:#244a76;border-color:#38689d;font-weight:750;transition:transform .15s,filter .15s}button:hover{filter:brightness(1.16);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}.primary{background:var(--gold);color:#171717;border-color:var(--gold)}.danger{background:#562d3b;border-color:#874252}
+.layout{display:grid;grid-template-columns:1.25fr .95fr;gap:14px}.panel{padding:16px;min-width:0}.panel h2{margin:0 0 12px;font-size:19px}.auction{display:grid;grid-template-columns:1fr .95fr;gap:12px}
+.player{padding:18px;background:linear-gradient(145deg,#1d3859,#102239);position:relative;overflow:hidden;min-height:270px}.player:after{content:"";position:absolute;width:180px;height:180px;border:1px solid #ffffff12;border-radius:50%;right:-55px;top:-55px;pointer-events:none}
+.player.live{animation:glow 1.6s ease-in-out infinite alternate}@keyframes glow{from{box-shadow:0 0 0 #ffd16600}to{box-shadow:0 0 25px #ffd16626}}
+.lot{color:var(--muted);font-size:12px}.name{font-size:clamp(22px,3vw,30px);font-weight:900;margin:8px 0}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font-size:11px;border:1px solid #ffffff2b;border-radius:99px;padding:3px 8px;color:#d9e5f4}.price{font-size:34px;font-weight:950;color:var(--gold);margin:13px 0 4px;font-variant-numeric:tabular-nums}.bidder{color:#d2dfef;min-height:24px}.bidrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.bidrow button{flex:1;min-width:100px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{padding:10px}.stat small{display:block;color:var(--muted)}.stat b{font-size:19px}
+.teams{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.team{padding:10px;min-width:0;transition:border-color .2s,transform .2s}.team.you{border-color:var(--gold);box-shadow:0 0 0 1px #ffd16635}.team.leading{animation:lead .55s ease}@keyframes lead{50%{border-color:var(--green);transform:scale(1.015)}}
+.teamtop{display:flex;align-items:center;gap:9px}.logo{width:42px;height:42px;border-radius:50%;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none;border:1px solid #ffffff33}.logo img{width:100%;height:100%;object-fit:contain;padding:3px}.fallback{font-size:11px;font-weight:900;color:#111}.teamname{font-weight:850}.team small{color:var(--muted);font-size:11px}.teamline{display:flex;justify-content:space-between;gap:8px;margin-top:7px;font-size:12px}.bar{height:5px;background:#263b55;border-radius:8px;overflow:hidden;margin-top:7px}.bar span{display:block;height:100%;background:var(--green);transition:width .35s}
+.log{height:255px;overflow:auto;background:#081523;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:13px}.log p{margin:0;padding:7px 2px;border-bottom:1px solid #1d3048;animation:login .25s ease}@keyframes login{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.log p:last-child{border:0}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.roster{max-height:320px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);position:sticky;top:0;background:var(--panel);z-index:1}
+.pooltools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}.pooltools select{font-size:12px;padding:7px}.tag{display:inline-block;padding:2px 6px;border-radius:99px;background:#233a56;color:#d9e7f8;font-size:10px}.status{color:var(--green);font-weight:800}.muted{color:var(--muted)}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}.right{margin-left:auto}.pulse{animation:pulse .8s ease}@keyframes pulse{50%{transform:scale(1.035);color:#fff}}
+@media(max-width:850px){.layout,.bottom{grid-template-columns:1fr}.auction{grid-template-columns:1fr}.teams{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.teams{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.wrap{padding:8px}.panel{padding:12px}}
+</style></head>
+<body>
+<header><h1>🏏 IPL 2027 Mega Auction</h1><p>PRO EDITION · Smart AI franchises · Build your champion squad</p></header>
+<div class="wrap">
+<section class="toolbar">
+<div><label for="myTeam">Your franchise</label><select id="myTeam"></select></div>
+<div><label for="budget">Starting purse</label><select id="budget"><option value="120">₹120 Cr</option><option value="110">₹110 Cr</option><option value="100">₹100 Cr</option><option value="90">₹90 Cr</option></select></div>
+<div><label for="difficulty">AI difficulty</label><select id="difficulty"><option value="balanced">Balanced</option><option value="aggressive">Aggressive</option><option value="expert">Expert</option></select></div>
+<button class="primary" id="start">▶ Start Auction</button><button class="danger" id="reset">Reset</button><span id="gameStatus" class="muted">Choose your team to begin.</span>
+</section>
+<div class="layout">
+<section class="panel"><h2>🔨 Live Auction</h2><div class="auction">
+<div class="player" id="playerCard"><div class="lot" id="lot">LOT — / —</div><div class="name" id="playerName">Auction not started</div><div class="chips" id="playerChips"></div><p class="muted" id="playerMeta">Pick a team and start the auction.</p><div class="price" id="currentBid">₹0.00 Cr</div><div class="bidder" id="bidder">Waiting for auction…</div><div class="bidrow"><button id="bid" class="primary" disabled>Place Bid</button><button id="pass" disabled>Pass</button><button id="next" disabled>Next Player</button></div></div>
+<div><div class="stats"><div class="stat"><small>Your purse</small><b id="myPurse">₹120 Cr</b></div><div class="stat"><small>Your squad</small><b id="myCount">0/25</b></div><div class="stat"><small>Pool left</small><b id="left">0</b></div></div><h2>📢 Auction Commentary</h2><div class="log" id="log"><p>Welcome to the auction room. AI owners are ready.</p></div></div>
+</div></section>
+<section class="panel"><h2>🏆 Franchise Table</h2><div class="teams" id="teams"></div></section>
+</div>
+<div class="bottom">
+<section class="panel"><h2>👥 Your Squad</h2><div class="roster" id="myRoster"><p class="muted">Your purchases will appear here.</p></div></section>
+<section class="panel"><h2>📋 Auction Player Pool</h2><div class="pooltools"><select id="filterRole"><option value="all">All roles</option><option>Batter</option><option>Bowler</option><option>All-rounder</option><option>Wicketkeeper</option></select><select id="filterCategory"><option value="all">All categories</option><option>Marquee</option><option>Capped</option><option>Uncapped</option></select><select id="filterStatus"><option value="all">All status</option><option value="upcoming">Upcoming</option><option value="sold">Sold</option><option value="unsold">Unsold</option></select></div><div class="roster" id="pool"><p class="muted">Pool will appear after the auction starts.</p></div></section>
+</div>
+<p class="footer">Fan-made simulator. Franchise logo images are loaded from IPL asset URLs; team marks fall back to abbreviations if an image is unavailable. Player pool is a demo list, not a verified official IPL 2027 auction register.</p>
+</div>
+<script>
+const TEAMS=[
+{id:"CSK",name:"Chennai Super Kings",color:"#f6c343",logo:"https://documents.iplt20.com/ipl/CSK/logos/Logooutline/CSKoutline.png"},
+{id:"MI",name:"Mumbai Indians",color:"#4b9be8",logo:"https://documents.iplt20.com/ipl/MI/Logos/Logooutline/MIoutline.png"},
+{id:"RCB",name:"Royal Challengers Bengaluru",color:"#ed4c4c",logo:"https://documents.iplt20.com/ipl/RCB/Logos/Logooutline/RCBoutline.png"},
+{id:"KKR",name:"Kolkata Knight Riders",color:"#b38be8",logo:"https://documents.iplt20.com/ipl/KKR/Logos/Logooutline/KKRoutline.png"},
+{id:"SRH",name:"Sunrisers Hyderabad",color:"#f58b3c",logo:"https://documents.iplt20.com/ipl/SRH/Logos/Logooutline/SRHoutline.png"},
+{id:"RR",name:"Rajasthan Royals",color:"#f18bbd",logo:"https://1000logos.net/wp-content/uploads/2024/03/Rajasthan-Royals-Logo-768x432.png"},
+{id:"DC",name:"Delhi Capitals",color:"#72a9ef",logo:"https://documents.iplt20.com/ipl/DC/Logos/LogoOutline/DCoutline.png"},
+{id:"PBKS",name:"Punjab Kings",color:"#e66b75",logo:"https://documents.iplt20.com/ipl/PBKS/Logos/Logooutline/PBKSoutline.png"},
+{id:"GT",name:"Gujarat Titans",color:"#75c5cf",logo:"https://documents.iplt20.com/ipl/GT/Logos/Logooutline/GToutline.png"},
+{id:"LSG",name:"Lucknow Super Giants",color:"#65c6a3",logo:"https://documents.iplt20.com/ipl/LSG/Logos/Logooutline/LSGoutline.png"}];
+// Demo starter pool. Add/replace entries when the official 2027 auction register is confirmed.
+const RAW_PLAYERS = [
 
+["Virat Kohli","India","Batter",2],["Rohit Sharma","India","Batter",2],["Jasprit Bumrah","India","Bowler",2],["Suryakumar Yadav","India","Batter",2],["Hardik Pandya","India","All-rounder",2],["Rishabh Pant","India","Wicketkeeper",2],["KL Rahul","India","Wicketkeeper",2],["Shubman Gill","India","Batter",2],["Rashid Khan","Afghanistan","Bowler",2],["Jos Buttler","England","Wicketkeeper",2],
+["MS Dhoni","India","Wicketkeeper",1],["Ravindra Jadeja","India","All-rounder",2],["Sanju Samson","India","Wicketkeeper",2],["Yashasvi Jaiswal","India","Batter",2],["Rinku Singh","India","Batter",1.5],["Andre Russell","West Indies","All-rounder",2],["Sunil Narine","West Indies","All-rounder",2],["Mitchell Starc","Australia","Bowler",2],["Pat Cummins","Australia","Bowler",2],["Travis Head","Australia","Batter",2],
+["Faf du Plessis","South Africa","Batter",1.5],["Glenn Maxwell","Australia","All-rounder",2],["David Miller","South Africa","Batter",1.5],["Kagiso Rabada","South Africa","Bowler",2],["Mohammed Siraj","India","Bowler",2],["Arshdeep Singh","India","Bowler",2],["Shreyas Iyer","India","Batter",2],["Ishan Kishan","India","Wicketkeeper",2],["Axar Patel","India","All-rounder",2],["Kuldeep Yadav","India","Bowler",2],
+["Ruturaj Gaikwad","India","Batter",2],["Devon Conway","New Zealand","Wicketkeeper",1.5],["Shivam Dube","India","All-rounder",1.5],["Matheesha Pathirana","Sri Lanka","Bowler",1.5],["Rachin Ravindra","New Zealand","All-rounder",1.5],["Phil Salt","England","Wicketkeeper",2],["Cameron Green","Australia","All-rounder",2],["Will Jacks","England","All-rounder",1.5],["Rajat Patidar","India","Batter",1.5],["Yuzvendra Chahal","India","Bowler",2],
+["Varun Chakravarthy","India","Bowler",1.5],["Venkatesh Iyer","India","All-rounder",1.5],["Nitish Kumar Reddy","India","All-rounder",1],["Abhishek Sharma","India","All-rounder",2],["Heinrich Klaasen","South Africa","Wicketkeeper",2],["Trent Boult","New Zealand","Bowler",2],["Avesh Khan","India","Bowler",1],["T Natarajan","India","Bowler",1],["Harshal Patel","India","Bowler",1],["Bhuvneshwar Kumar","India","Bowler",1.5],
+["Riyan Parag","India","All-rounder",1.5],["Dhruv Jurel","India","Wicketkeeper",1],["Shimron Hetmyer","West Indies","Batter",1.5],["Sandeep Sharma","India","Bowler",0.75],["Jofra Archer","England","Bowler",2],["Donovan Ferreira","South Africa","All-rounder",0.75],["Jake Fraser-McGurk","Australia","Batter",1.5],["Tristan Stubbs","South Africa","Batter",1.5],["Mukesh Kumar","India","Bowler",1],["Prithvi Shaw","India","Batter",0.75],
+["Shashank Singh","India","Batter",0.75],["Marcus Stoinis","Australia","All-rounder",1.5],["Liam Livingstone","England","All-rounder",1.5],["Harpreet Brar","India","All-rounder",0.75],["Kagiso Rabada","South Africa","Bowler",2],["Shahrukh Khan","India","Batter",0.75],["Sai Sudharsan","India","Batter",1.5],["Rahul Tewatia","India","All-rounder",1],["Mohit Sharma","India","Bowler",0.75],["Noor Ahmad","Afghanistan","Bowler",1.5],
+["Nicholas Pooran","West Indies","Wicketkeeper",2],["Aiden Markram","South Africa","Batter",1.5],["Mayank Yadav","India","Bowler",1],["Ravi Bishnoi","India","Bowler",1.5],["Ayush Badoni","India","All-rounder",0.75],["Mohsin Khan","India","Bowler",0.75],["David Warner","Australia","Batter",1.5],["Kane Williamson","New Zealand","Batter",1],["Quinton de Kock","South Africa","Wicketkeeper",1.5],["Daryl Mitchell","New Zealand","All-rounder",1.5]
+];
+const MARQUEE=new Set(["Virat Kohli","Rohit Sharma","Jasprit Bumrah","Suryakumar Yadav","Hardik Pandya","Rishabh Pant","KL Rahul","Shubman Gill","Rashid Khan","Jos Buttler","Andre Russell","Pat Cummins","Mitchell Starc","Travis Head","Heinrich Klaasen","Nicholas Pooran"]);
+const UNCAPPED=new Set(["Rinku Singh","Nitish Kumar Reddy","Riyan Parag","Dhruv Jurel","Shashank Singh","Sai Sudharsan","Ayush Badoni","Mayank Yadav","Harpreet Brar","Shahrukh Khan"]);
+const $=id=>document.getElementById(id), money=n=>"₹"+Number(n).toFixed(2)+" Cr";
+let game=null, botTimer=null;
+function makePlayers(){return RAW_PLAYERS.map((p,i)=>({id:i+1,name:p[0],country:p[1],role:p[2],base:p[3],category:MARQUEE.has(p[0])?"Marquee":(UNCAPPED.has(p[0])?"Uncapped":"Capped"),status:"upcoming"}))}
+function addLog(s){let p=document.createElement("p");p.textContent=s;$("log").prepend(p)}
+function franchise(id){return game.teams.find(t=>t.id===id)}
+function step(price){return price<1?0.05:price<2?0.10:price<5?0.20:0.25}
+function overseasCount(t){return t.squad.filter(p=>p.country!=="India").length}
+function roleCount(t,role){return t.squad.filter(p=>p.role===role).length}
+function init(){ $("myTeam").innerHTML=TEAMS.map(t=>`<option value="${t.id}">${t.id} — ${t.name}</option>`).join(""); }
+function setup(){
+ clearTimeout(botTimer);
+ let budget=+$("budget").value, me=$("myTeam").value;
+ game={me,budget,difficulty:$("difficulty").value,teams:TEAMS.map((t,i)=>({...t,purse:budget,squad:[],human:t.id===me,style:["value","star","balanced","aggressive","youth","bowling","batting","allround","balanced","value"][i],passed:false})),players:makePlayers().sort((a,b)=>({Marquee:0,Capped:1,Uncapped:2}[a.category]-({Marquee:0,Capped:1,Uncapped:2}[b.category]))||Math.random()-.5),index:0,current:null,highest:null,bid:0,sold:false,finished:false,humanPassed:false,humanPrompt:false};
+ $("log").innerHTML="";addLog(`Auction starts! You own ${me}. Nine AI owners are entering the room.`);$("gameStatus").textContent="Auction live";render();nextPlayer();
+}
+function legal(t,price){
+ if(t.squad.length>=25||t.purse+0.0001<price)return false;
+ if(t.squad.length>=18)return true;
+ let slots=18-t.squad.length-1;
+ return t.purse-price>=slots*.20 && (t.squad.filter(p=>p.country!=="India").length<8 || t.squad.length>=17 || true);
+}
+function aiMax(t,p){
+ let remaining=Math.max(1,25-t.squad.length), roleNeed=Math.max(0,(p.role==="Bowler"?5:p.role==="Batter"?5:p.role==="All-rounder"?2:2)-roleCount(t,p.role));
+ let roleFactor=1+Math.min(.65,roleNeed*.13);
+ let styleFactor={value:.72,star:1.65,balanced:1.12,aggressive:1.48,youth:.92,bowling:p.role==="Bowler"?1.45:.8,batting:p.role==="Batter"?1.45:.8,allround:p.role==="All-rounder"?1.55:.9}[t.style]||1;
+ let purseRatio=t.purse/game.budget;
+ let difficulty={balanced:1,aggressive:1.16,expert:1.08}[game.difficulty];
+ let scarcity=p.category==="Marquee"?1.28:1;
+ let ceiling=p.base*(2.0+roleNeed*.6)*roleFactor*styleFactor*scarcity*difficulty;
+ let cashCap=t.purse-Math.max(0,17-t.squad.length)*.2;
+ return Math.max(p.base,Math.min(ceiling,cashCap,game.budget*.38));
+}
+function aiInterest(t,p,next){
+ if(!legal(t,next))return false;
+ if(p.country!=="India"&&overseasCount(t)>=8)return false;
+ if(t.squad.length>=25)return false;
+ let need=aiMax(t,p), pressure=next/Math.max(.01,need);
+ let baseChance=p.category==="Marquee"?.72:.48;
+ if(t.style==="value")baseChance-=.13;
+ if(t.style==="aggressive"||t.style==="star")baseChance+=.16;
+ if(roleCount(t,p.role)===0)baseChance+=.12;
+ if(pressure>.8)baseChance-=.22;
+ if(t.purse/game.budget<.2)baseChance-=.35;
+ if(game.difficulty==="expert")baseChance+=.08;
+ return next<=need && Math.random()<Math.max(.05,Math.min(.94,baseChance));
+}
+function nextPlayer(){
+ if(!game||game.finished)return;
+ if(game.index>=game.players.length){finish();return}
+ let p=game.players[game.index++];p.status="live";game.current=p;game.highest=null;game.bid=0;game.sold=false;game.humanPassed=false;game.humanPrompt=false;
+ $("lot").textContent=`LOT ${game.index} / ${game.players.length}`;$("playerName").textContent=p.name;
+ $("playerMeta").textContent=`${p.country} · Base price ${money(p.base)}`;
+ $("playerChips").innerHTML=`<span class="chip">${p.role}</span><span class="chip">${p.category}</span><span class="chip">${p.country==="India"?"Indian":"Overseas"}</span>`;
+ $("currentBid").textContent=money(p.base);$("bidder").textContent="No bids yet · base price "+money(p.base);
+ $("playerCard").classList.add("live");$("next").disabled=true;$("next").textContent="Next Player";
+ $("bid").disabled=false;$("pass").disabled=false;addLog(`LOT ${game.index}: ${p.name} · ${p.role} · ${p.category} · base ${money(p.base)}.`);
+ render();runBots();
+}
+function currentNext(){return game.highest?game.bid+step(game.bid):game.current.base}
+function runBots(){
+ if(!game||!game.current||game.sold)return;
+ let p=game.current, next=currentNext();
+ let eligible=game.teams.filter(t=>!t.human&&!t.passed);
+ let interested=eligible.map(t=>({t,score:aiInterest(t,p,next)?Math.random()+({aggressive:.2,star:.15,balanced:.08,value:0,youth:.02,bowling:.05,batting:.05,allround:.05}[t.style]||0):0})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+ if(interested.length){
+   let t=interested[0].t;
+   game.bid=next;game.highest=t.id;addLog(`🤖 ${t.id} bids ${money(game.bid)} for ${p.name}.`);
+   $("currentBid").classList.remove("pulse");void $("currentBid").offsetWidth;$("currentBid").classList.add("pulse");
+   updateBid();botTimer=setTimeout(runBots,game.difficulty==="expert"?750:550);return;
+ }
+ if(!game.humanPassed&&game.highest!==game.me){
+   game.humanPrompt=true;$("bidder").textContent=(game.highest?game.highest+" leads":"No AI bids yet")+" · Your decision: bid or pass.";
+   $("bid").disabled=false;$("pass").disabled=false;return;
+ }
+ sell();
+}
+function updateBid(){
+ $("currentBid").textContent=money(game.bid||game.current.base);
+ $("bidder").textContent=game.highest?`${game.highest} is leading the bidding`:"No bids yet";
+ let me=franchise(game.me);$("bid").disabled=game.humanPassed||game.highest===game.me||!legal(me,currentNext())||(game.current.country!=="India"&&overseasCount(me)>=8);
+ $("pass").disabled=game.humanPassed;render();
+}
+function humanBid(){
+ if(!game||game.sold||game.humanPassed)return;
+ let t=franchise(game.me),p=game.current,n=currentNext();
+ if(!legal(t,n)||(p.country!=="India"&&overseasCount(t)>=8)){addLog("Your purse, squad or overseas limit blocks this bid.");return}
+ game.bid=n;game.highest=game.me;game.humanPrompt=false;addLog(`🙋 YOU bid ${money(n)} for ${p.name}!`);updateBid();runBots();
+}
+function humanPass(){if(!game||game.sold)return;game.humanPassed=true;$("bid").disabled=true;$("pass").disabled=true;addLog("You pass on this player. AI bidding continues.");runBots()}
+function sell(){
+ if(!game||game.sold)return;game.sold=true;clearTimeout(botTimer);let p=game.current;
+ if(game.highest){let t=franchise(game.highest);t.purse-=game.bid;t.squad.push({...p,paid:game.bid});p.status="sold";p.soldTo=t.id;p.paid=game.bid;addLog(`🔨 SOLD! ${p.name} to ${t.id} for ${money(game.bid)}.`)}
+ else{p.status="unsold";addLog(`UNSOLD! ${p.name} receives no bids.`)}
+ $("playerCard").classList.remove("live");$("bidder").textContent=game.highest?`SOLD to ${game.highest}`:"UNSOLD";$("bid").disabled=$("pass").disabled=true;$("next").disabled=false;$("next").textContent=game.index>=game.players.length?"Finish Auction":"Next Player";render();
+}
+function finish(){
+ game.finished=true;$("playerName").textContent="Auction Complete! 🏆";$("playerMeta").textContent="All demo-pool players have been auctioned."; $("playerChips").innerHTML="";$("currentBid").textContent="—";$("bidder").textContent="Final squads are ready. Compare the franchises below."; $("bid").disabled=$("pass").disabled=$("next").disabled=true;$("playerCard").classList.remove("live");$("gameStatus").textContent="Auction completed";addLog("🏆 Auction complete! Check the final squad and purse table.");render();
+}
+function render(){
+ if(!game)return;
+ let me=franchise(game.me);$("myPurse").textContent=money(me.purse);$("myCount").textContent=me.squad.length+"/25";$("left").textContent=game.players.filter(p=>p.status==="upcoming").length;
+ $("teams").innerHTML=game.teams.map(t=>`<article class="team ${t.human?"you":""} ${game.highest===t.id&&!game.sold?"leading":""}"><div class="teamtop"><div class="logo"><img src="${t.logo}" alt="${t.id} logo" onerror="this.remove();this.parentElement.innerHTML='<span class=\\'fallback\\'>${t.id}</span>'"></div><div><div class="teamname">${t.id} ${t.human?"· YOU":"· AI BOT"}</div><small>${t.name}</small></div></div><div class="teamline"><span>Purse left</span><b>${money(t.purse)}</b></div><div class="teamline"><span>Squad</span><b>${t.squad.length}/25</b></div><div class="teamline"><span>Overseas</span><b>${overseasCount(t)}/8</b></div><div class="bar"><span style="width:${Math.max(0,Math.min(100,t.purse/game.budget*100))}%"></span></div></article>`).join("");
+ $("myRoster").innerHTML=me.squad.length?`<table><thead><tr><th>Player</th><th>Role</th><th>Type</th><th>Paid</th></tr></thead><tbody>${me.squad.map(p=>`<tr><td>${p.name}</td><td>${p.role}</td><td>${p.country==="India"?"Indian":"Overseas"}</td><td>${money(p.paid)}</td></tr>`).join("")}</tbody></table>`:'<p class="muted">No players purchased yet.</p>';
+ let role=$("filterRole").value,cat=$("filterCategory").value,status=$("filterStatus").value;
+ let filtered=game.players.filter(p=>(role==="all"||p.role===role)&&(cat==="all"||p.category===cat)&&(status==="all"||p.status===status));
+ $("pool").innerHTML=`<table><thead><tr><th>Player</th><th>Role</th><th>Category</th><th>Base</th><th>Status</th></tr></thead><tbody>${filtered.map(p=>`<tr><td>${p.name}</td><td>${p.role}</td><td><span class="tag">${p.category}</span></td><td>${money(p.base)}</td><td>${p.status==="sold"?`<span class="status">${p.soldTo} · ${money(p.paid)}</span>`:p.status==="live"?"🔨 LIVE":p.status==="unsold"?"UNSOLD":"Upcoming"}</td></tr>`).join("")}</tbody></table>`;
+}
+$("start").onclick=setup;
+$("reset").onclick=()=>{clearTimeout(botTimer);game=null;$("gameStatus").textContent="Ready to start";$("playerName").textContent="Auction not started";$("playerMeta").textContent="Pick a team and start the auction.";$("playerChips").innerHTML="";$("lot").textContent="LOT — / —";$("currentBid").textContent="₹0.00 Cr";$("bidder").textContent="Waiting for auction…";$("teams").innerHTML="";$("myRoster").innerHTML="";$("pool").innerHTML="";$("log").innerHTML="<p>Game reset. Choose your team.</p>";$("myPurse").textContent="₹120 Cr";$("myCount").textContent="0/25";$("left").textContent="0";$("bid").disabled=$("pass").disabled=$("next").disabled=true;};
+$("bid").onclick=humanBid;$("pass").onclick=humanPass;$("next").onclick=()=>{if(game&&game.sold){game.humanPrompt=false;nextPlayer()}};
+["filterRole","filterCategory","filterStatus"].forEach(id=>$(id).onchange=render);
+init();
+</script></body></html>
